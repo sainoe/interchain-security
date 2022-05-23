@@ -476,19 +476,8 @@ func New(
 		app.AccountKeeper,
 		authtypes.FeeCollectorName,
 	)
+
 	providerModule := ibcprovider.NewAppModule(&app.ProviderKeeper)
-
-	// consumer keeper satisfies the staking keeper interface
-	// of the slashing module
-	app.SlashingKeeper = slashingkeeper.NewKeeper(
-		appCodec,
-		keys[slashingtypes.StoreKey],
-		app.ConsumerKeeper,
-		app.GetSubspace(slashingtypes.ModuleName),
-	)
-
-	// register slashing module StakingHooks to the consumer keeper
-	app.ConsumerKeeper = *app.ConsumerKeeper.SetHooks(app.SlashingKeeper.Hooks())
 	consumerModule := ibcconsumer.NewAppModule(app.ConsumerKeeper)
 
 	// register the proposal types

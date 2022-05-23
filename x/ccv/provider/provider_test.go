@@ -22,7 +22,6 @@ import (
 	ibctmtypes "github.com/cosmos/ibc-go/v3/modules/light-clients/07-tendermint/types"
 	ibctesting "github.com/cosmos/ibc-go/v3/testing"
 
-	app "github.com/cosmos/interchain-security/app/consumer"
 	appConsumer "github.com/cosmos/interchain-security/app/consumer"
 	appProvider "github.com/cosmos/interchain-security/app/provider"
 	"github.com/cosmos/interchain-security/testutil/simapp"
@@ -366,9 +365,8 @@ func (s *ProviderTestSuite) TestSendSlashPacketDoubleSign() {
 	validatorsPerChain := len(s.consumerChain.Vals.Validators)
 
 	providerStakingKeeper := s.providerChain.App.GetStakingKeeper()
-	providerSlashingKeeper := s.providerChain.App.(*app.App).SlashingKeeper
-
-	consumerKeeper := s.consumerChain.App.(*app.App).ConsumerKeeper
+	providerSlashingKeeper := s.providerChain.App.(*appProvider.App).SlashingKeeper
+	consumerKeeper := s.consumerChain.App.(*appConsumer.App).ConsumerKeeper
 
 	// get a cross-chain validator address, pubkey and balance
 	tmVals := s.consumerChain.Vals.Validators
@@ -412,7 +410,7 @@ func (s *ProviderTestSuite) TestSendSlashPacketDoubleSign() {
 	// save next VSC packet info
 	oldBlockTime = s.providerCtx().BlockTime()
 	timeout = uint64(types.GetTimeoutTimestamp(oldBlockTime).UnixNano())
-	valsetUpdateID := s.providerChain.App.(*app.App).ProviderKeeper.GetValidatorSetUpdateId(s.providerCtx())
+	valsetUpdateID := s.providerChain.App.(*appProvider.App).ProviderKeeper.GetValidatorSetUpdateId(s.providerCtx())
 
 	// receive the downtime packet on the provider chain;
 	// RecvPacket() calls the provider endblocker and thus sends a VSC packet to the consumer
@@ -488,7 +486,7 @@ func (s *ProviderTestSuite) getVal(index int) (validator stakingtypes.Validator,
 
 func (s *ProviderTestSuite) TestSlashPacketAcknowldgement() {
 	providerKeeper := s.providerChain.App.(*appProvider.App).ProviderKeeper
-	consumerKeeper := s.consumerChain.App.(*appProvider.App).ConsumerKeeper
+	consumerKeeper := s.consumerChain.App.(*appConsumer.App).ConsumerKeeper
 
 	packet := channeltypes.NewPacket([]byte{}, 1, consumertypes.PortID, s.path.EndpointA.ChannelID,
 		providertypes.PortID, "wrongchannel", clienttypes.Height{}, 0)
